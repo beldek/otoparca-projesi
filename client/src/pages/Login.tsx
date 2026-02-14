@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react'; // React'i buraya ekledik
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 
@@ -8,56 +8,65 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
 
-  const handleLogin = async (e: React.FormEvent) => {
+  // DÜZELTME: e: React.FormEvent<HTMLFormElement> yaptık.
+  // Bu sayede "deprecated" hatası almazsın ve TypeScript form elemanı olduğunu anlar.
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMessage('Giriş yapılıyor...');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      // API Adresi (Canlı Render Sunucusu)
+      const response = await axios.post('https://otoparca-api.onrender.com/api/auth/login', {
         email,
         password
       });
 
-      setMessage('✅ ' + response.data.message);
+      setMessage('✅ Giriş Başarılı! Yönlendiriliyorsunuz...');
       
-      // Kullanıcı bilgisini tarayıcı hafızasına (LocalStorage) kaydet
-      // Böylece sayfayı yenilese bile "giriş yapmış" sayılacak.
+      // Kullanıcı verisini kaydet
       localStorage.setItem('user', JSON.stringify(response.data.user));
+      
+      // Token varsa kaydet
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+      }
 
-      // 1 saniye sonra Panle yönlendir (Henüz yapmadık ama yapacağız)
+      // 1 saniye sonra panele git
       setTimeout(() => navigate('/dashboard'), 1000);
 
     } catch (error: any) {
-      setMessage('❌ ' + (error.response?.data?.message || 'Giriş Başarısız'));
+      console.error("Login Hatası:", error);
+      const errorMsg = error.response?.data?.message || 'Sunucuya bağlanılamadı. İnternetinizi kontrol edin.';
+      setMessage('❌ ' + errorMsg);
     }
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
-      <h2>Giriş Yap</h2>
+    <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
+      <h2 style={{ textAlign: 'center', color: '#333' }}>Giriş Yap</h2>
       
       <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
         <input 
-          type="email" placeholder="E-Posta" required 
+          type="email" placeholder="E-Posta Adresiniz" required 
           value={email} onChange={(e) => setEmail(e.target.value)}
-          style={{ padding: '10px' }}
+          style={{ padding: '12px', borderRadius: '5px', border: '1px solid #ddd' }}
         />
         
         <input 
-          type="password" placeholder="Şifre" required 
+          type="password" placeholder="Şifreniz" required 
           value={password} onChange={(e) => setPassword(e.target.value)}
-          style={{ padding: '10px' }}
+          style={{ padding: '12px', borderRadius: '5px', border: '1px solid #ddd' }}
         />
 
-        <button type="submit" style={{ padding: '10px', backgroundColor: '#28a745', color: 'white', border: 'none', cursor: 'pointer' }}>
+        <button type="submit" style={{ padding: '12px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' }}>
           Giriş Yap
         </button>
       </form>
 
-      {message && <p style={{ marginTop: '10px', fontWeight: 'bold' }}>{message}</p>}
+      {message && <p style={{ marginTop: '15px', fontWeight: 'bold', textAlign: 'center', color: message.startsWith('❌') ? 'red' : 'green' }}>{message}</p>}
       
-      <p style={{ marginTop: '20px' }}>
-        Hesabın yok mu? <Link to="/register">Kayıt Ol</Link>
+      <p style={{ marginTop: '20px', textAlign: 'center', fontSize: '14px' }}>
+        Hesabın yok mu? <Link to="/register" style={{ color: '#007bff', textDecoration: 'none', fontWeight: 'bold' }}>Kayıt Ol</Link>
       </p>
     </div>
   );
