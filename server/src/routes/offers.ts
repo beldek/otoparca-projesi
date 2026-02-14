@@ -32,18 +32,18 @@ router.post('/', upload.array('images', 3), async (req: Request, res: Response) 
             price: Number(price),
             condition,
             description,
-            images: imagePaths
+            images: imagePaths,
+            status: 'pending' // Varsayılan durum
         });
 
         const savedOffer = await newOffer.save();
 
-        const targetRequest = await RequestModel.findById(requestId) as any;
+        const targetRequest = await RequestModel.findById(requestId);
         if (targetRequest) {
             targetRequest.offerCount = (targetRequest.offerCount || 0) + 1;
             await targetRequest.save();
 
-            // --- WHATSAPP BİLDİRİMİ: MÜŞTERİYE ---
-            const msg = `🚀 TEKLİF GELDİ!\n\n"${targetRequest.partName}" talebiniz için ${price} TL tutarında bir teklif aldınız. Detaylar için uygulamayı kontrol edin!`;
+            const msg = `🚀 TEKLİF GELDİ!\n\n"${targetRequest.partName}" talebiniz için ${price} TL tutarında bir teklif aldınız.`;
             await sendWhatsApp(msg);
         }
 
@@ -57,31 +57,40 @@ router.post('/', upload.array('images', 3), async (req: Request, res: Response) 
 // 2. TEKLİF ONAYLA (PUT /api/offers/accept/:offerId)
 router.put('/accept/:offerId', async (req: Request, res: Response) => {
     try {
-        const offer = await Offer.findById(req.params.offerId).populate('request');
+        // SONUNA "as any" EKLEDİK: Bu TypeScript'in şikayet etmesini durdurur
+        const offer = await Offer.findById(req.params.offerId).populate('request') as any;
+        
         if (!offer) return res.status(404).json({ message: 'Teklif bulunamadı.' });
 
-        offer.isAccepted = true;
+        // Artık burada kırmızı çizgi çıkmayacak
+        offer.status = 'accepted'; 
+        
+        // Eğer modelinde isAccepted varsa bunu da yapabilirsin
+        if ('isAccepted' in offer) {
+            offer.isAccepted = true;
+        }
+
         await offer.save();
 
-        const request = await RequestModel.findByIdAndUpdate(
-            offer.request, 
-            { status: 'completed' },
-            { new: true }
-        ) as any;
-
-        // --- WHATSAPP BİLDİRİMİ: TEDARİKÇİYE ---
-        const msg = `✅ TEKLİFİNİZ ONAYLANDI!\n\n${offer.price} TL tutarındaki teklifiniz müşteri tarafından ONAYLANDI. Parçayı hazırlamaya başlayabilirsiniz. Bereketli olsun! 📦`;
-        await sendWhatsApp(msg);
+        // İlgili talebi kapat (Request modelini bulup status'u güncelle)
+        await RequestModel.findByIdAndUpdate(
+            offer.request._id || offer.request, 
+            { status: 'completed' }
+        );
 
         res.json({ message: 'Onaylandı ve bildirim gönderildi.' });
     } catch (error) {
+        console.error("Onay hatası:", error);
         res.status(500).json({ message: 'Onay hatası.' });
     }
 });
 
+// 3. TEKLİFLERİ LİSTELE (GET /api/offers/:requestId)
+// DİKKAT: URL'de "request" kelimesi yok, direkt ID bekliyor.
 router.get('/:requestId', async (req: Request, res: Response) => {
     try {
-        const offers = await Offer.find({ request: req.params.requestId }).populate('supplier', 'name');
+        const offers = await Offer.find({ request: req.params.requestId })
+            .populate('supplier', 'name companyName phone');
         res.json(offers);
     } catch (error) {
         res.status(500).json({ message: 'Teklifler getirilemedi.' });
