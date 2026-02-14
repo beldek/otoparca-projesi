@@ -81,7 +81,7 @@ const CreateRequest = () => {
     }
 
     try {
-      await axios.post('http://localhost:5000/api/requests', data, {
+      await axios.post('https://otoparca-api.onrender.com/api/requests', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       alert('✅ Talep oluşturuldu!');

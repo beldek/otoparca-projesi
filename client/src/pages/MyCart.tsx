@@ -30,12 +30,12 @@ const MyCart = () => {
     try {
       setLoading(true);
       // 1. Önce müşterinin tüm taleplerini alıyoruz
-      const reqRes = await axios.get(`http://localhost:5000/api/requests/user/${user.id}`);
+      const reqRes = await axios.get(`https://otoparca-api.onrender.com/api/requests/user/${user.id}`);
       const myRequests = reqRes.data;
 
       // 2. Her talep için teklifleri çekiyoruz
       const offerPromises = myRequests.map((req: any) => 
-        axios.get(`http://localhost:5000/api/offers/${req._id}`)
+        axios.get(`https://otoparca-api.onrender.com/api/offers/${req._id}`)
       );
       
       const responses = await Promise.all(offerPromises);
@@ -104,7 +104,7 @@ const MyCart = () => {
             {order.images && order.images.length > 0 && (
               <div style={{ display: 'flex', gap: '8px', marginTop: '15px', overflowX: 'auto' }}>
                 {order.images.map((img, idx) => (
-                  <img key={idx} src={`http://localhost:5000${img}`} 
+                  <img key={idx} src={`https://otoparca-api.onrender.com${img}`} 
                        style={{ width: '70px', height: '70px', borderRadius: '6px', objectFit: 'cover' }} />
                 ))}
               </div>

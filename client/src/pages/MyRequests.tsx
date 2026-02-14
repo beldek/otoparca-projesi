@@ -19,7 +19,7 @@ const MyRequests = () => {
   const fetchMyRequests = async () => {
     try {
       const userId = user.id || user._id;
-      const res = await axios.get(`http://localhost:5000/api/requests/user/${userId}`);
+      const res = await axios.get(`https://otoparca-api.onrender.com/api/requests/user/${userId}`);
       setRequests(res.data);
     } catch (err) {
       console.error("Talepler çekilemedi:", err);

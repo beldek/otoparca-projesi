@@ -35,7 +35,7 @@ const SupplierFeed = () => {
   }, [user.role, navigate]);
 
   const fetchRequests = () => {
-    axios.get('http://localhost:5000/api/requests')
+    axios.get('https://otoparca-api.onrender.com/api/requests')
       .then(res => setRequests(res.data))
       .catch(err => console.error(err));
   };
@@ -66,7 +66,7 @@ const SupplierFeed = () => {
     }
 
     try {
-      await axios.post('http://localhost:5000/api/offers', formData, {
+      await axios.post('https://otoparca-api.onrender.com/api/offers', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       alert('✅ Teklifiniz başarıyla iletildi!');
@@ -118,9 +118,9 @@ const SupplierFeed = () => {
                 <div style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '5px' }}>📸 Müşterinin Gönderdiği Görseller:</div>
                 <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', scrollbarWidth: 'none' }}>
                   {req.images.map((img, idx) => (
-                    <a key={idx} href={`http://localhost:5000${img}`} target="_blank" rel="noreferrer">
+                    <a key={idx} href={`https://otoparca-api.onrender.com${img}`} target="_blank" rel="noreferrer">
                       <img 
-                        src={`http://localhost:5000${img}`} 
+                        src={`https://otoparca-api.onrender.com${img}`} 
                         alt="Talep" 
                         style={{ width: '80px', height: '80px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #ddd' }} 
                       />

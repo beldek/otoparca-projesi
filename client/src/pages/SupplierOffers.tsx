@@ -35,7 +35,7 @@ const SupplierOffers = () => {
   const fetchMyOffers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`http://localhost:5000/api/offers/supplier/${user.id}`);
+      const res = await axios.get(`https://otoparca-api.onrender.com/api/offers/supplier/${user.id}`);
       setMyOffers(res.data);
     } catch (error) {
       console.error("Teklifler çekilemedi:", error);
@@ -117,9 +117,9 @@ const SupplierOffers = () => {
               {offer.images && offer.images.length > 0 && (
                 <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', marginBottom: '15px', scrollbarWidth: 'none' }}>
                   {offer.images.map((img, idx) => (
-                    <a key={idx} href={`http://localhost:5000${img}`} target="_blank" rel="noreferrer">
+                    <a key={idx} href={`https://otoparca-api.onrender.com${img}`} target="_blank" rel="noreferrer">
                       <img 
-                        src={`http://localhost:5000${img}`} 
+                        src={`https://otoparca-api.onrender.com${img}`} 
                         alt="Teklifim" 
                         style={{ width: '80px', height: '80px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #ddd' }} 
                       />
